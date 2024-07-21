@@ -26,10 +26,14 @@ export default class Drive {
   }
 
   private async fetcher(options: IDriveFetcher) {
-    const { headers, body, method, urlParams, searchParams } = defaultize(
-      defaultDriveFetcher,
-      options
-    );
+    const {
+      headers,
+      body,
+      method,
+      urlParams,
+      searchParams,
+      json = true,
+    } = defaultize(defaultDriveFetcher, options);
     const urlString = urlJoin(this.baseUrl, ...urlParams!); //urlParams filled by defaultize
     const search = new URLSearchParams(searchParams);
     const url = new URL(urlString);
@@ -44,7 +48,11 @@ export default class Drive {
     });
 
     if (response.status >= 200 && response.status < 300) {
-      return response.json();
+      if (json) {
+        return response.json();
+      } else {
+        return response;
+      }
     } else {
       return Promise.reject(response.json());
     }
@@ -69,12 +77,12 @@ export default class Drive {
     }
 
     //@ts-ignore: blabla
-    return (await this.fetcher({
+    return await this.fetcher({
       urlParams: ["files"],
       method: "POST",
       body,
       searchParams: { name },
-    }));
+    });
   }
 
   /**
@@ -82,12 +90,13 @@ export default class Drive {
    * @param name The name of the file to get.
    */
   async get(name: string): Promise<Uint8Array> {
-    return new Uint8Array(
-      (await this.fetcher({
-        searchParams: { name },
-        urlParams: ["files", "download"],
-      }).then((d) => d.arrayBuffer())) as number[]
-    );
+    return this.fetcher({
+      searchParams: { name },
+      urlParams: ["files", "download"],
+      json: false,
+    }).then((d) => {
+      return d.arrayBuffer();
+    });
   }
 
   async delete(name: string | string[]): Promise<IDeleteResponse> {

@@ -8,6 +8,7 @@ interface IDriveFetcher{
     body?: any,
     headers?: { [k: string]: any },
     method?: string
+    json?: boolean;
 }
 
 

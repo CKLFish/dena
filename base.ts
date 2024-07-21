@@ -115,9 +115,9 @@ export default class Base<T = Record<any, any>> {
     }
 
 
-    async query<T>(query: DefaultObject[] | DefaultObject = [], limit?: number, last?: string) : Promise<QueryResponse<T>> {
+    async query<T>(query: DefaultObject[] | DefaultObject = [], limit?: number, last?: string, sort: 'asc' | 'desc' = 'asc') : Promise<QueryResponse<T>> {
         query = toArray(query)
-        const body = { query, limit, last }
+        const body = { query, limit, last, sort }
         return await this.fetcher({
             method: "POST",
             urlParams: ["query"],
